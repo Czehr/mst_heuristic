@@ -460,6 +460,7 @@ def foodHeuristic(state, problem):
     heuristic = 0
     food = foodGrid.asList()
 
+   
     nodes = []
     nodes.append(position)
     for i in range(len(food)):
@@ -472,20 +473,34 @@ def foodHeuristic(state, problem):
             edge = (d, nodes[i], nodes[j])
             edges.append(edge) 
 
-    edges = sorted(edges)
+    sortedEdges = sorted(edges)
+
+
+    INF = 9999
+    graph = [[INF for x in range(len(nodes))] for y in range(len(nodes))]
+    for i in range (len(nodes)):
+        for j in range(len(nodes)):
+            graph[i][j] = manhattanDistance(nodes[i], nodes[j])
+    
+    for k in range(len(nodes)):
+        for i in range(len(nodes)):
+            for j in range(len(nodes)):
+                graph[i][j] = min(graph[i][j], graph[i][k] + graph[k][j])
 
     ##print(sorted(edges))
 
     subGraph = [];
     mstLength = 0;
-    for i in range(len(edges)):
-        currentEdge = edges[i]
+    for i in range(len(sortedEdges)):
+        currentEdge = sortedEdges[i]
         if not currentEdge[1] in subGraph or not currentEdge[2] in subGraph:
             mstLength += currentEdge[0]
             subGraph.append(currentEdge[1])
             subGraph.append(currentEdge[2])
             
     return mstLength 
+
+    
 
     ##if len(food) == 0:
     ##    return 0
