@@ -460,12 +460,15 @@ def foodHeuristic(state, problem):
     heuristic = 0
     food = foodGrid.asList()
 
-   
+    # Create list of nodes that includes Pacman's position 
     nodes = []
     nodes.append(position)
     for i in range(len(food)):
         nodes.append(food[i])
 
+    # Create a list of edges
+    # Each edge is a tuple of the manhattan distance, and both edge points
+    # Runs in n^2, generates edge between every pair of nodes
     edges = []
     for i in range (len(nodes)):
         for j in range(i, len(nodes)):
@@ -473,34 +476,57 @@ def foodHeuristic(state, problem):
             edge = (d, nodes[i], nodes[j])
             edges.append(edge) 
 
+    # Sort edges by distance (first element in the tuple)
     sortedEdges = sorted(edges)
 
 
+    # Floyd-Warshall
+    # Normally supplied a subset of edges instead of an edge for all pairs
+    # Here I used manhattan distance to generate edges again
     INF = 9999
     graph = [[INF for x in range(len(nodes))] for y in range(len(nodes))]
     for i in range (len(nodes)):
         for j in range(len(nodes)):
             graph[i][j] = manhattanDistance(nodes[i], nodes[j])
     
+    # k represents set of intermediate verticies 
     for k in range(len(nodes)):
+        # pick each vertex as a source
         for i in range(len(nodes)):
+            # pick each vertex as a destination
             for j in range(len(nodes)):
+                # if vertex k allows for a shorter path, update shortest path
                 graph[i][j] = min(graph[i][j], graph[i][k] + graph[k][j])
 
-    ##print(sorted(edges))
+    ## Floyd-Warshall complete, graph contains all shortest paths
+    ## However, since we used manhattan distance, our edge list 
+    ## already contains all shortest paths and is already formatted for 
+    ## Kruskal's algorithm, so I opted to use that format instead
 
+
+    # Kruskal's Algorithm
+    # Greedy algorithm that chooses shortest edge and checks for cycles
+    # Note that we sorted edges earlier
     subGraph = [];
     mstLength = 0;
     for i in range(len(sortedEdges)):
         currentEdge = sortedEdges[i]
+        # Check if either node attached to the current edge is already in the subgraph
+        # This is how we prevent cycles in our graph
         if not currentEdge[1] in subGraph or not currentEdge[2] in subGraph:
+            # Add the edge to the mstLength
+            # We only care about the total length so we don't worry about the path
             mstLength += currentEdge[0]
+            # Add BOTH nodes to the subgraph, duplicates won't affect cycle checking
             subGraph.append(currentEdge[1])
             subGraph.append(currentEdge[2])
             
     return mstLength 
 
     
+    ########################
+    ## Previous Heuristic ##
+    ########################
 
     ##if len(food) == 0:
     ##    return 0
