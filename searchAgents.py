@@ -456,6 +456,13 @@ def foodHeuristic(state, problem):
     heuristic = 0
     food = foodGrid.asList()
 
+    n = len(food) - 1
+    distances = [[0 for x in range(n)] for y in range(n)]
+
+    for x in range(n):
+        for y in range(n):
+            distances[x][y] = mazeDistance(food[x], food[y], problem.startingGameState)
+
     if len(food) == 0:
         return 0
 
