@@ -466,20 +466,6 @@ def foodHeuristic(state, problem):
     for i in range(len(food)):
         nodes.append(food[i])
 
-    # Create a list of edges
-    # Each edge is a tuple of the manhattan distance, and both edge points
-    # Runs in n^2, generates edge between every pair of nodes
-    edges = []
-    for i in range (len(nodes)):
-        for j in range(i, len(nodes)):
-            d = manhattanDistance(nodes[i], nodes[j])
-            edge = (d, nodes[i], nodes[j])
-            edges.append(edge) 
-
-    # Sort edges by distance (first element in the tuple)
-    sortedEdges = sorted(edges)
-
-
     # Floyd-Warshall
     # Normally supplied a subset of edges instead of an edge for all pairs
     # Here I used manhattan distance to generate edges again
@@ -487,7 +473,11 @@ def foodHeuristic(state, problem):
     graph = [[INF for x in range(len(nodes))] for y in range(len(nodes))]
     for i in range (len(nodes)):
         for j in range(len(nodes)):
+            ## manhattan distance trivializes the problem
+            ## BFS at every edge defeats the purpose of FW, and it takes 20 minutes to run
+            ## Ideally you'd have some pre-defined edge distances rather than computing them
             graph[i][j] = manhattanDistance(nodes[i], nodes[j])
+            ##graph[i][j] = mazeDistance(nodes[i], nodes[j], problem.startingGameState)
     
     # k represents set of intermediate verticies 
     for k in range(len(nodes)):
@@ -498,15 +488,29 @@ def foodHeuristic(state, problem):
                 # if vertex k allows for a shorter path, update shortest path
                 graph[i][j] = min(graph[i][j], graph[i][k] + graph[k][j])
 
+
     ## Floyd-Warshall complete, graph contains all shortest paths
-    ## However, since we used manhattan distance, our edge list 
-    ## already contains all shortest paths and is already formatted for 
-    ## Kruskal's algorithm, so I opted to use that format instead
+
 
 
     # Kruskal's Algorithm
     # Greedy algorithm that chooses shortest edge and checks for cycles
-    # Note that we sorted edges earlier
+
+    # Create a list of edges
+    # Each edge is a tuple of the manhattan distance, and both edge points
+    # Runs in n^2, generates edge between every pair of nodes
+    edges = []
+    for i in range (len(nodes)):
+        for j in range(i, len(nodes)):
+            ##d = manhattanDistance(nodes[i], nodes[j])
+            ##edge = (d, nodes[i], nodes[j])
+            edge = (graph[i][j], nodes[i], nodes[j])
+            edges.append(edge) 
+
+    # Sort edges by distance (first element in the tuple)
+    sortedEdges = sorted(edges)
+
+
     subGraph = [];
     mstLength = 0;
     for i in range(len(sortedEdges)):
@@ -515,7 +519,7 @@ def foodHeuristic(state, problem):
         # This is how we prevent cycles in our graph
         if not currentEdge[1] in subGraph or not currentEdge[2] in subGraph:
             # Add the edge to the mstLength
-            # We only care about the total length so we don't worry about the path
+            # We only care about the total length so we don't worry about the tree 
             mstLength += currentEdge[0]
             # Add BOTH nodes to the subgraph, duplicates won't affect cycle checking
             subGraph.append(currentEdge[1])
