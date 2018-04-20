@@ -424,6 +424,9 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+def manhattanDistance(p1, p2):
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -452,24 +455,45 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
+    
     position, foodGrid = state
     heuristic = 0
     food = foodGrid.asList()
 
-    n = len(food) - 1
-    distances = [[0 for x in range(n)] for y in range(n)]
+    nodes = []
+    nodes.append(position)
+    for i in range(len(food)):
+        nodes.append(food[i])
 
-    for x in range(n):
-        for y in range(n):
-            distances[x][y] = mazeDistance(food[x], food[y], problem.startingGameState)
+    edges = []
+    for i in range (len(nodes)):
+        for j in range(i, len(nodes)):
+            d = manhattanDistance(nodes[i], nodes[j])
+            edge = (d, nodes[i], nodes[j])
+            edges.append(edge) 
 
-    if len(food) == 0:
-        return 0
+    edges = sorted(edges)
 
-    for food in food:
-        distance = mazeDistance(position, food, problem.startingGameState)
-        if distance > heuristic:
-            heuristic = distance
+    ##print(sorted(edges))
+
+    subGraph = [];
+    mstLength = 0;
+    for i in range(len(edges)):
+        currentEdge = edges[i]
+        if not currentEdge[1] in subGraph or not currentEdge[2] in subGraph:
+            mstLength += currentEdge[0]
+            subGraph.append(currentEdge[1])
+            subGraph.append(currentEdge[2])
+            
+    return mstLength 
+
+    ##if len(food) == 0:
+    ##    return 0
+
+    ##for food in food:
+    ##    distance = mazeDistance(position, food, problem.startingGameState)
+    ##    if distance > heuristic:
+    ##        heuristic = distance
 
     return heuristic
 
